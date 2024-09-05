@@ -7,9 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace CitiManagerApi.Controllers
+namespace CityManagerApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -31,6 +29,7 @@ namespace CitiManagerApi.Controllers
             {
                 ModelState.AddModelError("Username", "Username already exist");
             }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -38,15 +37,16 @@ namespace CitiManagerApi.Controllers
 
             var userToCreate = new User
             {
-                Username = dto.Username,
+                Username = dto.Username
             };
 
             await _authRepository.Register(userToCreate, dto.Password);
             return StatusCode(StatusCodes.Status201Created);
         }
 
+
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody]UserForLoginDto dto)
+        public async Task<IActionResult> Login([FromBody] UserForLoginDto dto)
         {
             var user = await _authRepository.Login(dto.Username, dto.Password);
             if (user == null)
@@ -61,9 +61,9 @@ namespace CitiManagerApi.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[] {
-          new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
-          new Claim(ClaimTypes.Name,user.Username)
-      }),
+                    new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
+                    new Claim(ClaimTypes.Name,user.Username)
+                }),
                 Expires = DateTime.Now.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
             };
@@ -72,6 +72,5 @@ namespace CitiManagerApi.Controllers
             var tokenString = tokenHandler.WriteToken(token);
             return Ok(tokenString);
         }
-
     }
 }
